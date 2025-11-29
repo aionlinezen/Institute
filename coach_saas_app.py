@@ -163,7 +163,55 @@ def send_email(to_email, subject, body, institute_email=None):
 def index():
     return render_template('landing.html')
 
+@app.route('/sitemap.xml')
+def sitemap():
+    """Generate dynamic sitemap for SEO"""
+    from flask import Response
+    
+    conn = sqlite3.connect('coach_saas.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT username FROM institutes WHERE is_active = TRUE')
+    institutes = cursor.fetchall()
+    conn.close()
+    
+    sitemap_xml = '''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>{}</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>'''.format(request.url_root)
+    
+    for institute in institutes:
+        sitemap_xml += '''
+    <url>
+        <loc>{}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>'''.format(request.url_root + 'institute/' + institute[0])
+    
+    sitemap_xml += '\n</urlset>'
+    
+    return Response(sitemap_xml, mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots():
+    """Generate robots.txt for search engines"""
+    from flask import Response
+    
+    robots_txt = '''User-agent: *
+Allow: /
+Allow: /institute/
+Disallow: /admin/
+Disallow: /it/
+Disallow: /payment/
+
+Sitemap: {}sitemap.xml'''.format(request.url_root)
+    
+    return Response(robots_txt, mimetype='text/plain')
+
 @app.route('/institute/<username>')
+@app.route('/coaching/<username>')  # SEO-friendly alternative URL
 def institute_page(username):
     """Main institute landing page for aspirants"""
     conn = sqlite3.connect('coach_saas.db')

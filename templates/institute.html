@@ -1,12 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}{{ institute.institute_name }}{% endblock %}
+{% block title %}{{ institute.institute_name }} - Online Coaching Institute{% endblock %}
+
+{% block description %}Join {{ institute.institute_name }} for quality education and expert coaching. Online registration, study materials, and proven results.{% endblock %}
+
+{% block keywords %}{{ institute.institute_name }}, coaching institute, online education, study materials, entrance exam preparation{% endblock %}
+
+{% block og_title %}{{ institute.institute_name }} - Best Coaching Institute{% endblock %}
+
+{% block og_description %}Enroll at {{ institute.institute_name }} for comprehensive coaching programs. Expert faculty, quality education, and proven track record.{% endblock %}
 
 {% block content %}
+<!-- Structured Data for SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "{{ institute.institute_name }}",
+  "description": "{{ institute.why_choose_us.split('\n')[0] if institute.why_choose_us else 'Quality coaching institute' }}",
+  "url": "{{ request.url }}",
+  "sameAs": [
+    "{{ request.url_root }}institute/{{ institute.username }}"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "name": "Coaching Program",
+    "price": "{{ institute.amount }}",
+    "priceCurrency": "INR"
+  }
+}
+</script>
+
 <!-- Header Section -->
 <div class="hero-section text-center">
     <div class="container">
-        <h1 class="display-4 mb-3">{{ institute.institute_name }}</h1>
+        <h1 class="display-4 mb-3" itemprop="name">{{ institute.institute_name }}</h1>
         {% if institute.offer_text %}
         <div class="alert alert-warning d-inline-block">
             <i class="fas fa-star"></i> {{ institute.offer_text }}
@@ -17,8 +45,8 @@
 
 <div class="container my-5">
     <!-- Why Choose Us Section -->
-    <section class="mb-5">
-        <h2 class="text-center mb-4">Why Choose Us?</h2>
+    <section class="mb-5" itemscope itemtype="https://schema.org/AboutPage">
+        <h2 class="text-center mb-4" itemprop="name">Why Choose Us?</h2>
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">

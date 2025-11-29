@@ -1,8 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}Coach Institute SaaS - Landing{% endblock %}
+{% block title %}Coach Institute SaaS - Complete Coaching Management Platform{% endblock %}
+
+{% block description %}Professional SaaS platform for coaching institutes. Manage students, payments, content delivery with our comprehensive online solution.{% endblock %}
+
+{% block keywords %}coaching institute software, education management system, online coaching platform, student management, payment integration{% endblock %}
 
 {% block content %}
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Coach Institute SaaS",
+  "description": "Complete coaching institute management platform with online registration, payments, and content delivery",
+  "url": "{{ request.url }}",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "name": "SaaS Platform",
+    "category": "Education Management"
+  }
+}
+</script>
+
 <div class="hero-section text-center">
     <div class="container">
         <h1 class="display-4 mb-4">Coach Institute SaaS Platform</h1>
