@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Institute - IT Admin{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/it/dashboard"><i class="fas fa-cogs"></i> IT Admin Dashboard</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/it/dashboard">Back to Dashboard</a>
+            <a class="nav-link" href="/it/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-edit"></i> Edit Institute: {{ institute[3] }}</h5>
+                </div>
+                <div class="card-body">
+                    <form action="/it/update/{{ institute[0] }}" method="POST">
+                        <div class="mb-3">
+                            <label for="institute_name" class="form-label">Institute Name *</label>
+                            <input type="text" class="form-control" id="institute_name" name="institute_name" 
+                                   value="{{ institute[3] }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Admin Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ institute[6] or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="upi_id" class="form-label">UPI ID for Payments</label>
+                            <input type="text" class="form-control" id="upi_id" name="upi_id" 
+                                   value="{{ institute[5] or '' }}" 
+                                   placeholder="yourname@paytm">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Course Amount (₹)</label>
+                            <input type="number" class="form-control" id="amount" name="amount" 
+                                   value="{{ institute[7] or 1000 }}" 
+                                   placeholder="1000" min="1" step="0.01" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Username (URL)</label>
+                                    <input type="text" class="form-control" value="{{ institute[1] }}" readonly>
+                                    <div class="form-text">URL: /institute/{{ institute[1] }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <input type="text" class="form-control" 
+                                           value="{{ 'Active' if institute[8] else 'Disabled' }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/it/dashboard" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Institute</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

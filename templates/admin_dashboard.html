@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="fas fa-graduation-cap"></i> {{ institute.institute_name }}</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/admin/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <!-- Configuration Panel -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-cog"></i> Institute Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <form action="/admin/update" method="POST">
+                        <div class="mb-3">
+                            <label for="institute_name" class="form-label">Institute Name</label>
+                            <input type="text" class="form-control" id="institute_name" name="institute_name" 
+                                   value="{{ institute.institute_name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="offer_text" class="form-label">Offer/Exam Text</label>
+                            <input type="text" class="form-control" id="offer_text" name="offer_text" 
+                                   value="{{ institute.offer_text }}" 
+                                   placeholder="Great opportunity to crack SSC exam for 2025">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Admin Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ institute.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="upi_id" class="form-label">UPI ID for Payments</label>
+                            <input type="text" class="form-control" id="upi_id" name="upi_id" 
+                                   value="{{ institute.upi_id }}" 
+                                   placeholder="yourname@paytm">
+                        </div>
+                        <div class="mb-3">
+                            <label for="upi_id" class="form-label">UPI ID for Payments</label>
+                            <input type="text" class="form-control" id="upi_id" name="upi_id" 
+                                   value="{{ institute.upi_id }}" 
+                                   placeholder="yourname@paytm">
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Course Amount (₹)</label>
+                            <input type="number" class="form-control" id="amount" name="amount" 
+                                   value="{{ institute.amount }}" 
+                                   placeholder="1000" min="1" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="why_choose_us" class="form-label">Why Choose Us (one per line)</label>
+                            <textarea class="form-control" id="why_choose_us" name="why_choose_us" rows="4">{{ institute.why_choose_us }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pdf_title" class="form-label">PDF Download Title</label>
+                            <input type="text" class="form-control" id="pdf_title" name="pdf_title" 
+                                   value="{{ institute.pdf_title }}" 
+                                   placeholder="Download Sample Papers">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Configuration</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- PDF Upload -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-pdf"></i> PDF Management</h5>
+                </div>
+                <div class="card-body">
+                    {% if institute.pdf_filename %}
+                    <div class="alert alert-info">
+                        Current PDF: <strong>{{ institute.pdf_filename }}</strong>
+                    </div>
+                    {% endif %}
+                    <form action="/admin/upload_pdf" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="pdf_file" class="form-label">Upload New PDF</label>
+                            <input type="file" class="form-control" id="pdf_file" name="pdf_file" accept=".pdf" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Upload PDF</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Testimonials Management -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-comments"></i> Testimonials Management</h5>
+                </div>
+                <div class="card-body">
+                    <div id="testimonials-container">
+                        {% for testimonial in institute.testimonials %}
+                        <div class="testimonial-item border p-3 mb-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control mb-2" placeholder="Student Name" 
+                                           value="{{ testimonial.name }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="file" class="form-control mb-2" accept="image/*" 
+                                           onchange="uploadImage(this)">
+                                    <input type="hidden" class="image-url" value="{{ testimonial.image or '' }}">
+                                    {% if testimonial.image %}
+                                    <img src="{{ testimonial.image }}" class="img-thumbnail mt-2" width="100">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <textarea class="form-control mb-2" placeholder="Testimonial text" rows="2">{{ testimonial.text }}</textarea>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeTestimonial(this)">Remove</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="addTestimonial()">Add Testimonial</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTestimonials()">Save Testimonials</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Panel -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3 class="text-primary">{{ registrations|length }}</h3>
+                            <small>Total Registrations</small>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="text-success">{{ registrations|selectattr('payment_status', 'equalto', 'completed')|list|length }}</h3>
+                            <small>Paid</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-link"></i> Your Institute URL</h5>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ request.host_url }}institute/{{ session.username }}" readonly>
+                        <button class="btn btn-outline-secondary" onclick="copyURL()">Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Registrations -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-users"></i> Recent Registrations</h5>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    {% for reg in registrations[:5] %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom">
+                        <div>
+                            <strong>{{ reg[2] }}</strong><br>
+                            <small class="text-muted">{{ reg[3] }}</small>
+                        </div>
+                        <span class="badge bg-{{ 'success' if reg[5] == 'completed' else 'warning' }}">
+                            {{ reg[5].title() }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registrations Table -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5><i class="fas fa-table"></i> All Registrations</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Payment ID</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in registrations %}
+                        <tr>
+                            <td>{{ reg[0] }}</td>
+                            <td>{{ reg[2] }}</td>
+                            <td>{{ reg[3] }}</td>
+                            <td>{{ reg[4] }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if reg[5] == 'completed' else 'warning' }}">
+                                    {{ reg[5].title() }}
+                                </span>
+                            </td>
+                            <td>{{ reg[6] or '-' }}</td>
+                            <td>{{ reg[7] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyURL() {
+    const urlInput = document.querySelector('input[readonly]');
+    urlInput.select();
+    document.execCommand('copy');
+    alert('URL copied to clipboard!');
+}
+
+function addTestimonial() {
+    const container = document.getElementById('testimonials-container');
+    const testimonialHTML = `
+        <div class="testimonial-item border p-3 mb-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <input type="text" class="form-control mb-2" placeholder="Student Name">
+                </div>
+                <div class="col-md-6">
+                    <input type="file" class="form-control mb-2" accept="image/*" onchange="uploadImage(this)">
+                    <input type="hidden" class="image-url" value="">
+                </div>
+            </div>
+            <textarea class="form-control mb-2" placeholder="Testimonial text" rows="2"></textarea>
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeTestimonial(this)">Remove</button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', testimonialHTML);
+}
+
+function uploadImage(input) {
+    if (input.files && input.files[0]) {
+        const formData = new FormData();
+        formData.append('image', input.files[0]);
+        
+        fetch('/admin/upload_image', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const hiddenInput = input.parentElement.querySelector('.image-url');
+                hiddenInput.value = data.image_url;
+                
+                // Show preview
+                const existingImg = input.parentElement.querySelector('img');
+                if (existingImg) {
+                    existingImg.src = data.image_url;
+                } else {
+                    const img = document.createElement('img');
+                    img.src = data.image_url;
+                    img.className = 'img-thumbnail mt-2';
+                    img.width = 100;
+                    input.parentElement.appendChild(img);
+                }
+            } else {
+                alert('Image upload failed');
+            }
+        });
+    }
+}
+
+function removeTestimonial(button) {
+    button.closest('.testimonial-item').remove();
+}
+
+function saveTestimonials() {
+    const testimonials = [];
+    document.querySelectorAll('.testimonial-item').forEach(item => {
+        const name = item.querySelector('input[placeholder="Student Name"]').value;
+        const image = item.querySelector('.image-url').value;
+        const text = item.querySelector('textarea').value;
+        
+        if (name && text) {
+            testimonials.push({ name, image, text });
+        }
+    });
+    
+    fetch('/admin/update_testimonials', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ testimonials })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Testimonials saved successfully!');
+        } else {
+            alert('Error saving testimonials');
+        }
+    });
+}
+</script>
+{% endblock %}

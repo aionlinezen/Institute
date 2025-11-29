@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}IT Admin Dashboard{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#"><i class="fas fa-cogs"></i> IT Admin Dashboard</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/it/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="institutes-tab" data-bs-toggle="tab" data-bs-target="#institutes" type="button" role="tab">
+                <i class="fas fa-building"></i> Institute Management
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab">
+                <i class="fas fa-plus"></i> Create Institute
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="adminTabContent">
+        <!-- Institute Management Tab -->
+        <div class="tab-pane fade show active" id="institutes" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-building"></i> All Institutes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Institute Name</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for institute in institutes %}
+                                <tr>
+                                    <td>{{ institute[0] }}</td>
+                                    <td>{{ institute[3] }}</td>
+                                    <td>{{ institute[1] }}</td>
+                                    <td>{{ institute[6] or '-' }}</td>
+                                    <td>₹{{ institute[7] or 1000 }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if institute[8] else 'danger' }}">
+                                            {{ 'Active' if institute[8] else 'Disabled' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ institute[9] }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-{{ 'warning' if institute[8] else 'success' }}" 
+                                                onclick="toggleInstitute({{ institute[0] }})">
+                                            {{ 'Disable' if institute[8] else 'Enable' }}
+                                        </button>
+                                        <a href="/institute/{{ institute[1] }}" class="btn btn-sm btn-info" target="_blank">
+                                            View
+                                        </a>
+                                        <a href="/it/edit/{{ institute[0] }}" class="btn btn-sm btn-primary">
+                                            Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Create Institute Tab -->
+        <div class="tab-pane fade" id="create" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-plus"></i> Create New Institute</h5>
+                </div>
+                <div class="card-body">
+                    <form id="createInstituteForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="institute_name" class="form-label">Institute Name *</label>
+                                    <input type="text" class="form-control" id="institute_name" name="institute_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username (URL) *</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                    <div class="form-text">This will be the institute's URL: /institute/username</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Admin Email *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password *</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Create Institute</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleInstitute(instituteId) {
+    if (confirm('Are you sure you want to change the status of this institute?')) {
+        fetch(`/it/toggle_institute/${instituteId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating institute status');
+            }
+        });
+    }
+}
+
+// Handle create institute form
+document.getElementById('createInstituteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('/it/create_institute', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            this.reset();
+            // Switch to institutes tab and reload
+            document.getElementById('institutes-tab').click();
+            setTimeout(() => location.reload(), 500);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('An error occurred. Please try again.');
+    });
+});
+
+function editInstitute(id, name, email, upi, amount) {
+    console.log('Edit institute called:', id, name, email, upi, amount);
+    
+    const newName = prompt('Institute Name:', name);
+    if (newName === null || newName.trim() === '') return;
+    
+    const newEmail = prompt('Email:', email || '');
+    if (newEmail === null) return;
+    
+    const newUpi = prompt('UPI ID:', upi || '');
+    if (newUpi === null) return;
+    
+    const newAmount = prompt('Amount (₹):', amount || 1000);
+    if (newAmount === null || isNaN(newAmount)) return;
+    
+    const formData = new FormData();
+    formData.append('institute_name', newName.trim());
+    formData.append('email', newEmail.trim());
+    formData.append('upi_id', newUpi.trim());
+    formData.append('amount', parseFloat(newAmount));
+    
+    console.log('Sending edit request for institute:', id);
+    
+    fetch(`/it/edit_institute/${id}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            alert(data.message || 'Institute updated successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        alert('Network error occurred. Please try again.');
+    });
+}
+</script>
+{% endblock %}

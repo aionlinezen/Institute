@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Coach Institute SaaS - Landing{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 mb-4">Coach Institute SaaS Platform</h1>
+        <p class="lead mb-5">Empower your coaching institute with our comprehensive SaaS solution</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card bg-white text-dark p-4">
+                    <h3>Get Started</h3>
+                    <p>Create your institute's online presence or access your admin panel</p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="/admin/login" class="btn btn-primary btn-lg me-md-2">Institute Login</a>
+                        <a href="/it/login" class="btn btn-outline-dark btn-lg">IT Admin</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-cogs fa-3x text-primary mb-3"></i>
+                    <h5>Fully Configurable</h5>
+                    <p>Customize every aspect of your institute's landing page</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-credit-card fa-3x text-success mb-3"></i>
+                    <h5>Payment Integration</h5>
+                    <p>Secure UPI and card payment processing</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                    <h5>Analytics & Tracking</h5>
+                    <p>Track registrations and payment status</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

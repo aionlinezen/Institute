@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - {{ payment.institute_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4><i class="fas fa-credit-card"></i> Complete Payment</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Registration Details</h5>
+                        <p><strong>Name:</strong> {{ payment.name }}</p>
+                        <p><strong>Email:</strong> {{ payment.email }}</p>
+                        <p><strong>Institute:</strong> {{ payment.institute_name }}</p>
+                        <p><strong>Registration ID:</strong> {{ payment.registration_id }}</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Payment Options</h5>
+                        
+                        <!-- UPI Payment -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6><i class="fas fa-mobile-alt text-success"></i> UPI Payment</h6>
+                                <p class="mb-2">UPI ID: <strong>{{ payment.upi_id }}</strong></p>
+                        <p class="mb-2">Amount: <strong>₹{{ payment.amount }}</strong></p>
+                                <div class="d-grid">
+                                    <button class="btn btn-success" onclick="initiateUPIPayment()">
+                                        Pay with UPI
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Payment -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h6><i class="fas fa-credit-card text-primary"></i> Card Payment</h6>
+                                <form id="cardPaymentForm">
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <label class="form-label">Card Number</label>
+                                            <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label">Expiry</label>
+                                            <input type="text" class="form-control" placeholder="MM/YY" maxlength="5">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">CVV</label>
+                                            <input type="text" class="form-control" placeholder="123" maxlength="3">
+                                        </div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="button" class="btn btn-primary" onclick="initiateCardPayment()">
+                                            Pay with Card
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manual Confirmation (for demo) -->
+                    <div class="alert alert-info">
+                        <small><strong>Demo Mode:</strong> Click below to simulate successful payment</small>
+                    </div>
+                    <form action="/payment/confirm" method="POST">
+                        <input type="hidden" name="registration_id" value="{{ payment.registration_id }}">
+                        <input type="hidden" name="payment_id" value="DEMO_{{ payment.registration_id }}_{{ range(1000, 9999) | random }}">
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-check"></i> Confirm Payment (Demo)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function initiateUPIPayment() {
+    // In production, integrate with actual UPI payment gateway
+    const upiId = '{{ payment.upi_id }}';
+    const amount = '{{ payment.amount }}';
+    const note = 'Course Registration - {{ payment.institute_name }}';
+    
+    // UPI deep link (works on mobile devices with UPI apps)
+    const upiUrl = `upi://pay?pa=${upiId}&pn={{ payment.institute_name }}&am=${amount}&cu=INR&tn=${note}`;
+    
+    // Try to open UPI app
+    window.location.href = upiUrl;
+    
+    // Show manual confirmation after 3 seconds
+    setTimeout(() => {
+        if (confirm('Did you complete the UPI payment of ₹' + amount + '? Click OK to confirm.')) {
+            confirmPayment('UPI_' + Date.now());
+        }
+    }, 3000);
+}
+
+function initiateCardPayment() {
+    // In production, integrate with payment gateway like Razorpay, Stripe, etc.
+    alert('Card payment integration would be implemented here with actual payment gateway.');
+    
+    // Simulate payment for demo
+    if (confirm('Simulate successful card payment?')) {
+        confirmPayment('CARD_' + Date.now());
+    }
+}
+
+function confirmPayment(paymentId) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/payment/confirm';
+    
+    const regIdInput = document.createElement('input');
+    regIdInput.type = 'hidden';
+    regIdInput.name = 'registration_id';
+    regIdInput.value = '{{ payment.registration_id }}';
+    
+    const payIdInput = document.createElement('input');
+    payIdInput.type = 'hidden';
+    payIdInput.name = 'payment_id';
+    payIdInput.value = paymentId;
+    
+    form.appendChild(regIdInput);
+    form.appendChild(payIdInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Format card number input
+document.querySelector('input[placeholder="1234 5678 9012 3456"]').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+    e.target.value = formattedValue;
+});
+
+// Format expiry input
+document.querySelector('input[placeholder="MM/YY"]').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    }
+    e.target.value = value;
+});
+</script>
+{% endblock %}
