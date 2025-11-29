@@ -17,7 +17,7 @@
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
   "name": "{{ institute.institute_name }}",
-  "description": "{{ institute.why_choose_us.split('\n')[0] if institute.why_choose_us else 'Quality coaching institute' }}",
+  "description": "Quality coaching institute",
   "url": "{{ request.url }}",
   "sameAs": [
     "{{ request.url_root }}institute/{{ institute.username }}"
