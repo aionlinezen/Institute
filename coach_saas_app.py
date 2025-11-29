@@ -161,6 +161,8 @@ def send_email(to_email, subject, body, institute_email=None):
 
 @app.route('/')
 def index():
+    # Ensure database exists
+    init_db()
     return render_template('landing.html')
 
 @app.route('/sitemap.xml')
@@ -214,6 +216,9 @@ Sitemap: {}sitemap.xml'''.format(request.url_root)
 @app.route('/coaching/<username>')  # SEO-friendly alternative URL
 def institute_page(username):
     """Main institute landing page for aspirants"""
+    # Ensure database exists
+    init_db()
+    
     conn = sqlite3.connect('coach_saas.db')
     cursor = conn.cursor()
     
