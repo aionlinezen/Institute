@@ -618,26 +618,38 @@ def update_testimonials():
 # IT Admin Routes
 @app.route('/it/login')
 def it_login():
-    return render_template('it_login.html')
+    try:
+        # Ensure database is initialized
+        init_db()
+        return render_template('it_login.html')
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 @app.route('/it/authenticate', methods=['POST'])
 def it_authenticate():
-    username = request.form['username']
-    password = request.form['password']
-    
-    conn = sqlite3.connect('coach_saas.db')
-    cursor = conn.cursor()
-    cursor.execute('SELECT id, password_hash FROM it_admins WHERE username = ?', (username,))
-    admin = cursor.fetchone()
-    conn.close()
-    
-    if admin and check_password_hash(admin[1], password):
-        session['it_admin_id'] = admin[0]
-        session['it_username'] = username
-        return redirect(url_for('it_dashboard'))
-    
-    flash('Invalid credentials')
-    return redirect(url_for('it_login'))
+    try:
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Ensure database is initialized
+        init_db()
+        
+        conn = sqlite3.connect('coach_saas.db')
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, password_hash FROM it_admins WHERE username = ?', (username,))
+        admin = cursor.fetchone()
+        conn.close()
+        
+        if admin and check_password_hash(admin[1], password):
+            session['it_admin_id'] = admin[0]
+            session['it_username'] = username
+            return redirect(url_for('it_dashboard'))
+        
+        flash('Invalid credentials')
+        return redirect(url_for('it_login'))
+    except Exception as e:
+        flash(f'Database error: {str(e)}')
+        return redirect(url_for('it_login'))
 
 @app.route('/it/dashboard')
 def it_dashboard():
