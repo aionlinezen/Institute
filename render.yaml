@@ -1,32 +1,11 @@
 services:
-  # Main SaaS Application
   - type: web
-    name: coach-saas-app
+    name: institute
     env: python
-    buildCommand: pip install -r requirements_saas.txt
-    startCommand: python coach_saas_app.py
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn coach_saas_app:app
     envVars:
       - key: SECRET_KEY
         generateValue: true
-      - key: SENDER_EMAIL
-        value: your-email@gmail.com
-      - key: SENDER_PASSWORD
-        value: your-app-password
-      - key: FLASK_ENV
-        value: production
-    
-  # Payment Service
-  - type: web
-    name: coach-payment-service
-    env: python
-    buildCommand: pip install -r requirements_saas.txt
-    startCommand: python payment_service.py
-    envVars:
-      - key: PAYMENT_SECRET_KEY
-        generateValue: true
-      - key: RAZORPAY_KEY_ID
-        value: rzp_test_key
-      - key: RAZORPAY_KEY_SECRET
-        value: rzp_test_secret
       - key: FLASK_ENV
         value: production
